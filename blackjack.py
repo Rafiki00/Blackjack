@@ -3,15 +3,16 @@ import random
 dealers_hand = []
 users_budget = 100
 cards = ['A', 'A', 'A', 'A', 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 'J', 'J', 'J', 'J', 'Q', 'Q', 'Q', 'Q', 'K', 'K', 'K', 'K']
-bet = input("Your budget is {}. How much are you willing to bet? ".format(users_budget))
 
+
+def NewGame():
+	return input("Your budget is {}. How much are you willing to bet? ".format(users_budget))	
 
 class Game:
 	
 	def __init__(self):
 		self.users_hand = random.choices(cards, k=2)
 		self.dealers_hand = random.choices(cards, k=1)
-		self.users_score = 0
 
 	def evaluate(self):
 		self.users_score = 0
@@ -26,32 +27,72 @@ class Game:
 					self.users_score += 11
 			else:
 				self.users_score += i
-
+		print("Your score is {}".format(self.users_score))		
 		if self.users_score == 21:
 			if count == 1:
-				print("Blackjack! You win {}".format(self.users_budget * 1.5))
+				print("Blackjack! You win {}".format(self.bet * 1.5))
 				self.users_budget += (bet * 1.5)
+				return
 			else:
 				self.users_budget += (bet * 2)
+				return
 
 		if self.users_score > 21:
 			print("You go bust! You lose {}".format(bet))
+			return
+
+		self.decide()
 
 	def deal(self):
 		self.users_hand.append(random.choice(cards))
+		self.evaluate()
 
 	def decide(self):
 		hit_or_stay = input("Do you want to hit or stay? (H/S) ")
 		if(hit_or_stay == 'H'):
 			self.deal()
+		else:
+			self.dealers_turn()
+
+	def dealers_turn(self):
+		self.dealers_hand.append(random.choice(cards))
+		print("The dealers cards are {}".format(self.users_hand))
+		self.evaluate_dealers()
+
+	def evaluate_dealers(self):
+		self.dealers_score = 0
+		for i in self.dealers_hand:
+			if i in ['J', 'Q', 'K']:
+				self.dealers_score += 10
+			elif i == 'A':
+				if self.dealers_score >= 11:
+					self.dealers_score += 1
+				else:
+					self.dealers_score += 11
+			else:
+				self.dealers_score += i
+		print("The dealer's score is {}".format(self.dealers_score))		
+		if self.dealers_score == self.users_score:
+			print("It's a tie! You get your bet back.")
+			return
+		elif self.dealers_score <= 16:
+			self.dealers_turn()
+		elif self.dealers_score > 16:
+			if self.dealers_score < self.users_score:
+				print("You win {}".format(bet * 2))
+				return
+			else:
+				print("You lose your bet ({})".format(bet))
+				return
+		else:
+			print("The dealer went bust. You win {}".format(bet * 2))
+			return
 
 
+
+
+bet = NewGame()
 new_game = Game()
 print(new_game.users_hand)
 print(new_game.dealers_hand)
 new_game.evaluate()
-print(new_game.users_score)
-new_game.decide()
-new_game.evaluate()
-print(new_game.users_hand)
-print(new_game.users_score)
